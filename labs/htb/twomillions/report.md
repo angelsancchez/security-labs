@@ -1,4 +1,4 @@
-# TwoMillion – Informe de Pentesting
+# TwoMillions – Informe de Pentesting
 
 ## 1. Resumen Ejecutivo
 
@@ -14,7 +14,7 @@ El sistema fue completamente comprometido.
 
 ## 2. Alcance
 
-- Objetivo: TwoMillion (Hack The Box)  
+- Objetivo: TwoMillions (Hack The Box)  
 - Tipo de prueba: Caja individual (entorno controlado)  
 - Objetivo: Identificar vulnerabilidades y comprometer el sistema  
 
