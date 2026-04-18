@@ -1,52 +1,86 @@
-# Perfil enfocado a SOC / Blue Team con base en seguridad ofensiva
+# Cybersecurity Portfolio | SOC / Blue Team
 
-Repositorio de prácticas de ciberseguridad centrado en la resolución de laboratorios y elaboración de informes técnicos.
-
----
-
-## [Enfoque]
-
-- Enumeración de sistemas y servicios
-- Análisis de superficie de ataque
-- Identificación de vulnerabilidades
-- Explotación
-- Escalada de privilegios
+Repositorio orientado a detección de amenazas, análisis de ataques y respuesta en entornos corporativos, con base en conocimientos ofensivos.
 
 ---
 
-## [Plataformas]
+## Enfoque principal
 
-- Hack The Box
-- VulnHub / Dockerlabs
-
----
-
-## [Estructura]
-
-Cada laboratorio incluye:
-
-- Proceso de enumeración
-- Identificación de vulnerabilidades
-- Fases de explotación
-- Técnicas de escalada de privilegios
-- Impacto del compromiso
-- Recomendaciones de seguridad
-- Enfoque de detección (Blue Team)
+* Detección de ataques reales (Splunk / SIEM)
+* Análisis de logs y correlación de eventos
+* Investigación de incidentes (mentalidad SOC)
+* Comprensión del ciclo completo de ataque
 
 ---
 
-## [Objetivo]
+## Base ofensiva
 
-Desarrollar habilidades prácticas en ciberseguridad ofensiva como base para la transición hacia roles de Blue Team (SOC), enfocados en:
-
-- Detección de amenazas
-- Análisis de logs
-- Correlación de eventos (SIEM)
-- Respuesta ante incidentes
+* Enumeración de sistemas y servicios
+* Identificación y explotación de vulnerabilidades
+* Escalada de privilegios
+* Post-explotación
 
 ---
 
-## [Notas]
+## Proyectos destacados
 
-Este repositorio recoge únicamente laboratorios seleccionados y documentados con enfoque profesional.
-No representa un listado completo de prácticas realizadas, sino una muestra de capacidades técnicas.
+### Attack Timeline Detection
+
+Análisis completo de un compromiso:
+
+* Web RCE → Reverse Shell → Kerberoasting → DCSync
+* Correlación de eventos en múltiples fases
+* Enfoque SOC real
+
+Ruta: `/soc-analysis/attack-timeline-detection.md`
+
+---
+
+### Detección con Splunk
+
+Casos de uso desarrollados:
+
+* Kerberoasting detection
+* DCSync detection
+* Brute force (correlación 4625 + 4624)
+* Reverse shell detection
+* Web RCE detection
+
+Ruta: `/splunk/`
+
+---
+
+## Laboratorios
+
+Prácticas en entornos reales:
+
+* Hack The Box
+* VulnHub / Dockerlabs
+
+Incluyen:
+
+* Enumeración
+* Explotación
+* Escalada de privilegios
+* Impacto y mitigación
+* Enfoque de detección
+
+Ruta: `/labs/`
+
+---
+
+## Objetivo
+
+Transición hacia rol de SOC Analyst / Blue Team, con foco en:
+
+* Detección de amenazas
+* Análisis de logs
+* Correlación en SIEM
+* Respuesta ante incidentes
+
+---
+
+## Notas
+
+Este repositorio contiene una selección de trabajos representativos, enfocados en calidad y análisis técnico, no en cantidad.
+
