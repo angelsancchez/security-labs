@@ -1,21 +1,20 @@
-# Metasploitable 2
-# Web Application Exploitation – SQL Injection & Privilege Escalation
+# Metasploitable 2 – Multi-Vector Exploitation & Privilege Escalation
 
 ## 1. Resumen Ejecutivo
 
-La máquina objetivo expone una base de datos MySQL accesible y una aplicación web vulnerable a inyección SQL.
+La máquina Metasploitable 2 expone múltiples servicios vulnerables, permitiendo diferentes vectores de ataque que conducen al compromiso completo del sistema.
 
-Mediante la explotación de esta vulnerabilidad, fue posible obtener credenciales válidas, acceder al panel administrativo y ejecutar código en el sistema mediante la subida de una reverse shell.
+Durante el análisis se identificaron vulnerabilidades críticas en servicios como FTP, SMB, MySQL, VNC y aplicaciones web, permitiendo obtener acceso inicial mediante explotación directa, credenciales débiles y vulnerabilidades conocidas.
 
-El sistema fue completamente comprometido.
+El sistema fue completamente comprometido mediante múltiples rutas de ataque.
 
 ---
 
 ## 2. Alcance
 
-- Objetivo: Metasploitable 2 (entorno laboratorio)
-- Tipo de prueba: Evaluación de aplicación web
-- Objetivo: Identificar vulnerabilidades y comprometer el sistema
+- Objetivo: Metasploitable 2
+- Tipo de prueba: Evaluación de servicios expuestos
+- Objetivo: Identificar múltiples vectores de ataque y comprometer el sistema
 
 ---
 
@@ -27,104 +26,166 @@ Se realizó un escaneo completo de puertos:
 nmap -p- -sS --min-rate 5000 -T4 -n -Pn <IP>
 ```
 
-Puerto relevante detectado:
+Servicios relevantes detectados:
 
-- 3306/tcp (MySQL)
+- 21/tcp → FTP (vsftpd 2.3.4)
+- 22/tcp → SSH
+- 80/tcp → HTTP (DVWA)
+- 445/tcp → SMB
+- 3306/tcp → MySQL
+- 5900/tcp → VNC
 
-Confirmación del servicio:
+---
+
+## 4. Superficie de Ataque
+
+La máquina presenta múltiples vectores:
+
+- Servicios expuestos con versiones vulnerables
+- Credenciales débiles o por defecto
+- Servicios accesibles sin autenticación
+- Aplicaciones web vulnerables (SQLi)
+- Configuración insegura de servicios
+
+---
+
+## 5. Vulnerabilidades Identificadas
+
+### 5.1 FTP – vsftpd 2.3.4 (Backdoor)
+
+- Vulnerabilidad conocida con backdoor
+- Permite ejecución remota de comandos
+
+Exploit:
 
 ```bash
-nmap -p3306 -sCV <IP>
+searchsploit vsftpd 2.3.4
 ```
 
----
+Resultado:
 
-## 4. Análisis de Superficie de Ataque
-
-Se identificaron dos vectores principales:
-
-- Base de datos MySQL accesible
-- Aplicación web en puerto 80
-
-La aplicación web presentaba un formulario de autenticación.
+- Shell remota obtenida en puerto 6200
 
 ---
 
-## 5. Identificación de Vulnerabilidades
+### 5.2 SSH – Credenciales débiles
 
-### 5.1 SQL Injection
+- No se detectaron vulnerabilidades directas
+- Acceso obtenido mediante fuerza bruta
 
-El formulario de login era vulnerable a inyección SQL.
+Herramientas:
 
-Prueba:
+```bash
+hydra
+nmap --script ssh-brute
+```
 
-```sql
+Resultado:
+
+- Acceso válido mediante credenciales débiles
+
+---
+
+### 5.3 SMB – Exposición de recursos
+
+- Posible acceso anónimo
+- Enumeración de usuarios y recursos
+
+Herramientas:
+
+```bash
+smbclient -L //<IP> -N
+enum4linux -a <IP>
+```
+
+Riesgos:
+
+- Exposición de información
+- Posible obtención de credenciales
+
+---
+
+### 5.4 MySQL + Aplicación Web (DVWA)
+
+- Base de datos accesible
+- Vulnerabilidad de SQL Injection
+
+Ejemplo:
+
+```bash
 ' OR 1=1#
 ```
 
-Permitía eludir la autenticación.
+Automatización:
 
-Tipo de vulnerabilidad:
+```bash
+sqlmap -r request.txt --dump
+```
 
-- SQL Injection (Authentication Bypass)
-- Falta de validación de entrada
+Resultado:
+
+- Obtención de usuarios y hashes
+- Acceso a panel administrativo
+- Subida de reverse shell
+
+---
+
+### 5.5 VNC – Contraseña débil
+
+- Servicio expuesto sin protección
+- Sin limitación de intentos
+
+Fuerza bruta:
+
+```bash
+hydra -s 5900 -P wordlist.txt <IP> vnc
+```
+
+Resultado:
+
+- Acceso completo al sistema gráfico
 
 ---
 
 ## 6. Explotación
 
-### 6.1 Automatización con SQLMap
+Se lograron múltiples accesos mediante:
 
-Se interceptó la petición HTTP y se utilizó SQLMap:
-
-```bash
-sqlmap -r request.txt --dbs
-```
-
-Base de datos identificada:
-
-- `doc`
-
-Enumeración:
-
-```bash
-sqlmap -r request.txt -D doc --tables
-sqlmap -r request.txt -D doc -T users --dump
-```
-
-Se obtuvieron credenciales válidas.
+- Exploit directo (FTP backdoor)
+- Fuerza bruta (SSH, VNC)
+- SQL Injection + web shell
+- Enumeración de servicios
 
 ---
 
 ## 7. Acceso Inicial
 
-Con las credenciales obtenidas:
+Se obtuvieron accesos mediante:
 
-- Se accedió al panel administrativo
-- Se confirmaron privilegios elevados
+- Shell remota (FTP)
+- Acceso SSH
+- Web shell desde aplicación vulnerable
+- Acceso VNC
 
 ---
 
-## 8. Ejecución de Código
+## 8. Escalada de Privilegios
 
-La aplicación permitía subida de archivos sin validación adecuada.
+Dependiendo del vector:
 
-Se subió una reverse shell en PHP y se ejecutó:
-
-```bash
-nc -lvnp 8888
-```
-
-Se obtuvo acceso remoto al sistema.
+- Uso de credenciales encontradas
+- Configuraciones inseguras del sistema
+- Acceso directo en entorno vulnerable
 
 ---
 
 ## 9. Impacto
 
-- Acceso remoto al sistema
-- Ejecución de código arbitrario
-- Compromiso completo de la máquina
-- Acceso a datos sensibles
+- Compromiso total del sistema
+- Ejecución remota de código
+- Acceso a credenciales
+- Acceso persistente
+- Posibilidad de movimiento lateral
 
 Impacto: Crítico
 
@@ -132,54 +193,55 @@ Impacto: Crítico
 
 ## 10. Recomendaciones
 
-- Implementar validación de entradas
-- Utilizar consultas preparadas (prepared statements)
-- Restringir acceso a la base de datos
-- Validar la subida de archivos
-- Aplicar controles de autenticación robustos
+- Actualizar servicios vulnerables (FTP, SMB)
+- Deshabilitar servicios innecesarios
+- Implementar políticas de contraseñas robustas
+- Restringir acceso a servicios críticos
+- Validar entradas en aplicaciones web
+- Implementar controles de acceso
 
 ---
 
-## 11. Conclusión
+## 11. Detección y Defensa (Blue Team Perspective)
 
-Este laboratorio demuestra cómo una vulnerabilidad de SQL Injection puede derivar en un compromiso completo del sistema.
+Este laboratorio es especialmente útil para detección SOC.
 
-La cadena de ataque incluyó:
+Indicadores de compromiso:
 
-- SQL Injection
-- Obtención de credenciales
-- Acceso administrativo
-- Ejecución remota de código
+- Conexiones a puerto 6200 (backdoor FTP)
+- Intentos de login repetidos (SSH, VNC)
+- Acceso a recursos SMB sin autenticación
+- Consultas SQL anómalas (SQL Injection)
+- Subida de archivos sospechosos (web shell)
+- Conexiones salientes desde el servidor (reverse shell)
 
----
+Fuentes de logs:
 
-## 12. Conceptos Clave
+- auth.log (SSH)
+- logs FTP
+- logs web (Apache)
+- logs MySQL
+- tráfico de red
 
-- SQL Injection
-- Authentication Bypass
-- Explotación web
-- Reverse Shell
-- Control de acceso débil
+Medidas de detección:
 
----
-
-## 13. Detección y Defensa (Blue Team Perspective)
-
-Desde el punto de vista defensivo, esta actividad podría detectarse mediante:
-
-- Registros de aplicación con consultas SQL anómalas (payloads como `' OR 1=1`)
-- Múltiples intentos de autenticación fallidos o patrones sospechosos
-- Uso de herramientas automatizadas (SQLMap) detectable por patrones de tráfico
-- Subida de archivos no autorizados en el servidor web
-- Conexiones salientes inusuales (reverse shell) desde el servidor hacia IP externas
-- Actividad anómala en logs de Apache/Nginx
-
-Medidas de detección recomendadas:
-
-- Monitorización de logs de aplicación y base de datos
-- Implementación de WAF (Web Application Firewall)
-- Alertas por comportamiento anómalo en autenticación
-- Supervisión de tráfico de red saliente
-- Integración con SIEM (por ejemplo, Splunk) para correlación de eventos
+- Alertas por múltiples intentos de login
+- Detección de patrones de SQL Injection
+- Monitorización de procesos sospechosos
+- Correlación de eventos en SIEM (Splunk)
+- Detección de conexiones anómalas
 
 ---
+
+## 12. Conclusión
+
+Metasploitable 2 demuestra un escenario realista donde múltiples configuraciones inseguras permiten el compromiso total del sistema.
+
+La clave del ataque no fue una única vulnerabilidad, sino:
+
+- Enumeración sistemática
+- Identificación de múltiples vectores
+- Explotación combinada
+- Uso de credenciales débiles
+
+Este tipo de entorno refleja situaciones reales en sistemas mal configurados.
